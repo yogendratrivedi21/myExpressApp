@@ -1,0 +1,58 @@
+name: Azure environment up
+
+on:
+  pull_request:
+    types: [labeled]
+
+env:
+  AZURE_RESOURCE_GROUP: actions-webapp-rg
+  AZURE_APP_PLAN: actions-asp
+  AZURE_LOCATION: '"Central US"'
+  AZURE_WEBAPP_NAME: node-06272020
+
+jobs:
+  setup-up-azure-resources:
+    runs-on: ubuntu-latest
+
+    if: contains(github.event.pull_request.labels.*.name, 'azure up')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create Azure resource group
+        if: success()
+        run: |
+          az group create --location ${{env.AZURE_LOCATION}} --name ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{secrets.AZURE_SUBSCRIPTION_ID}}
+      - name: Create Azure app service plan
+        if: success()
+        run: |
+          az appservice plan create --resource-group ${{env.AZURE_RESOURCE_GROUP}} --name ${{env.AZURE_APP_PLAN}} --is-linux --sku F1 --subscription ${{secrets.AZURE_SUBSCRIPTION_ID}}
+      - name: Create webapp resource
+        if: success()
+        run: |
+          az webapp create -g ${{ env.AZURE_RESOURCE_GROUP }} -p ${{ env.AZURE_APP_PLAN }} -n ${{ env.AZURE_WEBAPP_NAME }} --runtime "node|10.14" --subscription ${{secrets.AZURE_SUBSCRIPTION_ID}}
+
+  destroy-azure-resources:
+    runs-on: ubuntu-latest
+
+    if: contains(github.event.pull_request.labels.*.name, 'azure down')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Destroy Azure environment
+        if: success()
+        run: |
+          az group delete --name ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{secrets.AZURE_SUBSCRIPTION_ID}} --yes
