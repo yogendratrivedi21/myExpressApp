@@ -5,10 +5,10 @@ on:
     types: [labeled]
 
 env:
-  AZURE_RESOURCE_GROUP: actions-webapp-rg
-  AZURE_APP_PLAN: actions-asp
-  AZURE_LOCATION: '"Central US"'
-  AZURE_WEBAPP_NAME: node-06272020
+  AZURE_RESOURCE_GROUP: vtutorqnamakerserviceNew
+  AZURE_APP_PLAN: GFTLKMVirtualBotLanguage-serverfarm-be3fea
+  AZURE_LOCATION: '"East US"'
+  AZURE_WEBAPP_NAME: aspnettepwebapp
 
 jobs:
   setup-up-azure-resources:
